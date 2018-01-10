@@ -22,7 +22,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         Button btn = new Button();
-        btn.setText("Say 'Hello World'");
+        btn.setText("Hola Mundo\nEsta es la aplicacion de Warren");
         btn.setOnAction(new EventHandler<ActionEvent>() {
             
             @Override
