@@ -1,13 +1,14 @@
 package warren.pongfx;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 
@@ -16,6 +17,7 @@ public class Main extends Application {
     int alturaventana=500;
     int anchuraventana=900;
     double velbolaactual = 3;
+    double dificultad = 0.7;
     double velbolax = 3;
     double velbolay = 3;
     double bolaposx = anchuraventana/2;
@@ -26,10 +28,11 @@ public class Main extends Application {
     int barra2posx = anchuraventana-35;
     int barra2posy = 50;
     int alturajugador = 60;
-    int velpalo1=0;
-    int velpalo2=0;
+    double velpalo1=0;
+    double velpalo2=0;
     int player1puntos=0;
     int player2puntos=0;
+    double velplayer2=6;
     
      public void punto(){
             velbolaactual = 3;
@@ -37,6 +40,7 @@ public class Main extends Application {
             velbolay = 3;
             bolaposx = anchuraventana/2;
             bolaposy = alturaventana/2;
+            
         }
     @Override
     public void start(Stage primaryStage) {
@@ -55,7 +59,15 @@ public class Main extends Application {
         player1.setFill(Color.WHITE);
         Rectangle player2 = new Rectangle(barra2posx, barra2posy, 10, alturajugador);
         player2.setFill(Color.WHITE);
-        root.getChildren().addAll(bola,player1,player2);
+        //Texto de puntuacion
+        Text texto = new Text();
+        texto.setText("0"+"                                "+"0");
+        texto.setTranslateX((anchuraventana/2)-100);
+        texto.setTranslateY(20);
+        texto.setTextAlignment(TextAlignment.CENTER);
+        texto.setWrappingWidth(200);
+        texto.setFill(Color.WHITE);
+        root.getChildren().addAll(bola,player1,player2,texto);
        
         //AnimationTImer, un bucle que se repite a 60 Hz
         AnimationTimer animacion = new AnimationTimer() {
@@ -72,13 +84,24 @@ public class Main extends Application {
                     }
                 }
                 //Movimiento Palo 2
-                if (bolaposy < barra2posy+alturajugador/2){
-                    velpalo2 = -6;
+                //Mientras que la velocidad de la bola es menor
+                if(velbolaactual<=velplayer2){
+                    barra2posy = (int) bola.getY() - alturajugador/2 ;
+                }if(velbolaactual>velplayer2){
+                    if (bolaposy < barra2posy-3+alturajugador/2){
+                    velpalo2 = -velplayer2;
                 }else{
-                    if(bolaposy > barra2posy+alturajugador/2){
-                        velpalo2 = 6;
+                    if(bolaposy > barra2posy+3+alturajugador/2){
+                        velpalo2 = velplayer2;
                     }
-                
+                }
+                }
+                if(barra2posy< 0){
+                    barra2posy=0;
+                } else{
+                    if(barra2posy > alturaventana-alturajugador){
+                        barra2posy = alturaventana-alturajugador;
+                    }
                 }
                 barra2posy += velpalo2;
                 player2.setY(barra2posy);
@@ -95,31 +118,33 @@ public class Main extends Application {
                 if(player2rebote == false){
                     velbolax=velbolaactual*-1;
                 }
+                
                 //Movimiento y reobte de bola
                 bolaposx+=velbolax;
                 bolaposy+=velbolay;
                 if (bolaposx >=anchuraventana-bolagrande){
-                    System.out.println("punto");
                     player1puntos+=1;
                     System.out.println("Player1: "+player1puntos+" Player 2: "+player2puntos);
                     punto();
-                    velbolax=(velbolaactual+0.2)*-1;
+                    texto.setText(player1puntos+"                                "+player2puntos);
+                    velbolax=velbolaactual*-1;
                 }
                 if (bolaposx <0){
                     player2puntos+=1;
-                    System.out.println("Player1: "+player1puntos+"Player 2: "+player2puntos);
+                    System.out.println("Player1: "+player1puntos+" Player 2: "+player2puntos);
                     punto();
-                    velbolax=velbolaactual+0.2;
+                    texto.setText(player1puntos+"                                "+player2puntos);
+                    
                 }
                 if (bolaposy >= alturaventana-bolagrande){
                     velbolay=-velbolaactual;
                     
-                    velbolaactual+=0.5;
+                    velbolaactual+=dificultad;
                     
                 }
                 if (bolaposy <0){
                     velbolay=velbolaactual;
-                    velbolaactual+=+0.5;
+                    velbolaactual+=+dificultad;
                 }
                 
                 bola.setX(bolaposx);
@@ -129,17 +154,14 @@ public class Main extends Application {
             };
         };
         //Entradas de teclado
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                switch(event.getCode()){
-                    case UP:
-                        velpalo1= -9;
-                        break;
-                    case DOWN:
-                        velpalo1= 9;
-                        break;
-                }
+        scene.setOnKeyPressed((KeyEvent event) -> {
+            switch(event.getCode()){
+                case UP:
+                    velpalo1= -9;
+                    break;
+                case DOWN:
+                    velpalo1= 9;
+                    break;
             }
         });
         scene.setOnKeyReleased((KeyEvent event) -> {
